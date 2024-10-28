@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #action{
+            background-color: rgb(0, 0, 2);
+            display: flex;
+            color: beige;
+            font-style: oblique;
+            flex-direction: row;
+            justify-content: center;
+            margin: 1rem;
+            padding: 9rem;
+            border: 10px solid black;
+            border-radius: 9px;
+        }
+    </style>
+</head>
+<body>
+    <div id="action">
+       
+        <h4>join a room : <%= roomId %></h4>
+        <form action="/room/<%= roomId %>" method="get">
+            <input type="text" name="roomId" placeholder="roomId">
+            <button type="submit">join</button>
+        </form>
+    </div>
+</body>
+</html>

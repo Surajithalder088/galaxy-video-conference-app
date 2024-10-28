@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    #action{
+            background-color: rgb(0, 0, 2);
+            display: flex;
+            color: beige;
+            font-style: oblique;
+            flex-direction: row;
+            justify-content: center;
+            margin: 1rem;
+            padding: 9rem;
+            border: 10px solid black;
+            border-radius: 9px;
+        }</style>
+</head>
+<body>
+ <div id="action">
+
+ 
+  <form style="display: flex; flex-direction: column; max-width: 50vw;"  action="/auth/login" method="post">
+     <h2 style="font-weight: bold;">LOGIN to your account to access meeting</h2>
+    <input type="email" name="email" placeholder="email" >
+    <input type="password" name="password" placeholder="password" >
+    <button style="background-color: blue; width: 5rem; margin: 3px;margin-left: 12rem;" type="submit"> login</button>
+    <p>New user ? Register first <a href="/auth/signup">signup here</a></p>
+  </form></div>
+  <p>FOR DEMO CHECKING LOGIN AS : email:    first@mail.com | password:  first</p>
+</body>
+</html>

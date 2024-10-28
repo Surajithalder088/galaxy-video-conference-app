@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #action{
+            background-color: rgb(0, 0, 2);
+            display: flex;
+            color: beige;
+            font-style: oblique;
+            flex-direction: row;
+            justify-content: center;
+            margin: 1rem;
+            padding: 9rem;
+            border: 10px solid black;
+            border-radius: 9px;
+        }
+        #video-container{
+          background-color: rgb(48, 3, 20);
+            font-size: 3rem;
+            font-style: oblique;
+            color: beige;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            margin: 1.5rem;
+            padding: 1.5rem;
+            border: 3px solid black;
+            border-radius: 20px;
+        }
+    </style>
+    
+</head>
+<body>
+     <div id="action"></div>
+
+     <h1>Room : id- <%=roomId%></h1>
+     <div id="video-container">
+        
+        </div>
+      <!-- Control Buttons -->
+  <div id="controls">
+
+    <button id="joinButton">Join Meeting</button>
+    <button id="leaveButton">leaveMeeting</button>
+    <button id="screenShareButton">Screen Share</button>
+    <button id="alert">Chat</button>
+  </div>
+
+    
+   
+   
+    
+        <div id="chat-container" style="display: none;">
+            <input id="chat-message" type="text" placeholder="Type a message..." />
+            <button onclick="sendMessage()">Send</button>
+            <div id="messages"></div>
+          </div>
+        
+      
+    <!--
+    <script src="/js/socket.js"></script>
+    <script src="/js/webrtc.js"></script>-->
+    <script src="/socket.io/socket.io.js"></script>
+   
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const socket = io();
+        const roomId = "<%= roomId %>";
+        const userId = socket.id;
+        let localStream;
+        let screenStream;
+        
+        function addVideoStream(stream) {
+          const videoContainer = document.getElementById('video-container');
+          const videoElement = document.createElement('video');
+          videoElement.srcObject = stream;
+          videoElement.autoplay = true;
+          videoElement.playsInline = true;
+          videoContainer.appendChild(videoElement);
+        }
+  
+        // Join Meeting
+        document.getElementById('joinButton').addEventListener('click', async () => {
+
+              if(localStream){ return alert('Already joined')}
+          try {
+
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false});
+            addVideoStream(localStream);
+            socket.emit('join-room', roomId, userId);
+            const response= await fetch(`/room/${roomId}/join`,
+              {
+                method:'POST',
+                headers:{
+                  'Content-Type':'application/json'
+                },
+               
+              }
+            )
+            let result=response.json()
+            console.log( result.Object);
+            
+          } catch (err) {
+            console.error('Error joining meeting:', err);
+          }
+        });
+  
+        // Leave Meeting
+        document.getElementById('leaveButton').addEventListener('click', async() => {
+          socket.emit('leave-room');
+          const videoContainer = document.getElementById('video-container');
+          videoContainer.innerHTML = ''; // Remove all video elements
+          localStream.getTracks().forEach(track => track.stop());
+          const response= await fetch(`/room/${roomId}/leave`,
+              {
+                method:'POST',
+                headers:{
+                  'Content-Type':'application/json'
+                },
+               
+              }
+            )
+            let result=response.json()
+            console.log(result);
+           
+            
+          
+        });
+  
+        // Screen Sharing
+        document.getElementById('screenShareButton').addEventListener('click', async () => {
+          try {
+            screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            socket.emit('screen-share', { roomId, userId, stream: screenStream.id });
+            addVideoStream(screenStream);
+          } catch (err) {
+            console.error('Error sharing screen:', err);
+          }
+        });
+
+        document.getElementById('alert').addEventListener('click', async () => {
+            //await fetch(`/room/${roomId}/join`)
+           const res= await fetch('/chat',
+              {
+                method:'POST',
+                headers:{
+                  'Content-Type':'application/json'
+                },
+               
+              }
+            )
+            let result=res.json() ;
+            console.log(result);
+            alert("check console")
+            
+        })
+  
+        // Handle incoming screen share
+        socket.on('share-screen', (data) => {
+          if (data.stream && !screenStream) {
+            const screenVideo = document.createElement('video');
+            screenVideo.srcObject = data.stream;
+            screenVideo.autoplay = true;
+            screenVideo.playsInline = true;
+            document.getElementById('video-container').append(screenVideo);
+          }
+        });
+  
+        // Handle user disconnecting
+        socket.on('user-disconnected', (userId) => {
+          console.log(`User ${userId} disconnected`);
+          const videoContainer = document.getElementById('video-container');
+          videoContainer.innerHTML = ''; // Clear the video container when users leave
+        });
+      });
+    </script>
+ 
+</body>
+</html>
