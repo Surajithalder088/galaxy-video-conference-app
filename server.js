@@ -18,6 +18,8 @@ socketHandler(io);
 
 const JWT_SECRET = process.env.JWT_TOKEN ;
 
+const User = require('./model/user');
+
 // Middleware and Routes
 app.set('view engine','ejs') ;
 app.set('views',path.join(__dirname,'views')) ;
@@ -45,15 +47,18 @@ app.get('/', (req,res)=>{
         res.render('pages/dashboard');
       
 })
-app.post('/chat',(req,res)=>{
-        let val={m:"working"};
-        res.json(val)
+app.post('/chat',async(req,res)=>{
+      try{ 
+     const users=   await User.find();
+     res.json({users})}catch(err){
+        res.json('failed')
+     }
 })
 
 
 const dbConnect = async()=>{
         try{
-         await  mongoose.connect( process.env.MONGO_URL, { useNewUrlParser: true });
+         await  mongoose.connect( process.env.MONGO_URL, { useNewUrlParser: true ,useUnifiedTopology:true});
                 console.log('data base connected');
                 
         }catch(err){
